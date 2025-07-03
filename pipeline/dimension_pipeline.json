@@ -1,0 +1,701 @@
+{
+	"name": "dimension_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Api_To_ADLS",
+				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('items')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Retrieve_Tables",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"supportRFC5988": "true"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "rest_api_dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"par_api": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "json_api_output",
+									"type": "DatasetReference",
+									"parameters": {
+										"name": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "scorers_json_to_parquet",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Api_To_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['player']['id']"
+								},
+								"sink": {
+									"name": "player_id",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['player']['firstName']"
+								},
+								"sink": {
+									"name": "firstName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['player']['lastName']"
+								},
+								"sink": {
+									"name": "lastName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['player']['dateOfBirth']"
+								},
+								"sink": {
+									"name": "dateOfBirth",
+									"type": "Date"
+								}
+							},
+							{
+								"source": {
+									"path": "['player']['nationality']"
+								},
+								"sink": {
+									"name": "nationality",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['team']['id']"
+								},
+								"sink": {
+									"name": "team_id",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['competition']['name']"
+								},
+								"sink": {
+									"name": "competition_name",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": "$['scorers']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "json_api_output",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": "scorers"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Parquet_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": "scorers"
+						}
+					}
+				]
+			},
+			{
+				"name": "teams_json_to_parquet",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "Api_To_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id_team",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['name']"
+								},
+								"sink": {
+									"name": "name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['shortName']"
+								},
+								"sink": {
+									"name": "shortName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['founded']"
+								},
+								"sink": {
+									"name": "founded",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['clubColors']"
+								},
+								"sink": {
+									"name": "clubColors",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['venue']"
+								},
+								"sink": {
+									"name": "venue",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['coach']['id']"
+								},
+								"sink": {
+									"name": "coach_id",
+									"type": "Int32"
+								}
+							}
+						],
+						"collectionReference": "$['teams']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "json_api_output",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": "teams"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Parquet_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": "teams"
+						}
+					}
+				]
+			},
+			{
+				"name": "coach_json_to_parquet",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "Api_To_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['coach']['id']"
+								},
+								"sink": {
+									"name": "coach_id",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['coach']['firstName']"
+								},
+								"sink": {
+									"name": "firstName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['coach']['lastName']"
+								},
+								"sink": {
+									"name": "lastName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['coach']['dateOfBirth']"
+								},
+								"sink": {
+									"name": "coach_dateOfBirth",
+									"type": "Date"
+								}
+							},
+							{
+								"source": {
+									"path": "['coach']['nationality']"
+								},
+								"sink": {
+									"name": "coach_nationality",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": "$['teams']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "json_api_output",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": "teams"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Parquet_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": "coach"
+						}
+					}
+				]
+			},
+			{
+				"name": "Create_Tables",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "coach_json_to_parquet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Parquet_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": {
+								"value": "coach",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": {
+								"value": "coach",
+								"type": "Expression"
+							},
+							"schema": "dbo"
+						}
+					}
+				]
+			},
+			{
+				"name": "Create_Tables_copy1",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "teams_json_to_parquet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Parquet_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": {
+								"value": "teams",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": {
+								"value": "teams",
+								"type": "Expression"
+							},
+							"schema": "dbo"
+						}
+					}
+				]
+			},
+			{
+				"name": "Create_Tables_copy2",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "scorers_json_to_parquet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Parquet_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"name": {
+								"value": "scorers",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": {
+								"value": "scorers",
+								"type": "Expression"
+							},
+							"schema": "dbo"
+						}
+					}
+				]
+			}
+		],
+		"variables": {
+			"items": {
+				"type": "Array",
+				"defaultValue": [
+					"teams",
+					"scorers"
+				]
+			},
+			"items2": {
+				"type": "Array",
+				"defaultValue": [
+					"teams",
+					"scorers",
+					"coach"
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-16T07:47:34Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

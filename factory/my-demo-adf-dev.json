@@ -1,0 +1,14 @@
+{
+	"name": "my-demo-adf-dev",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "West Europe",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "3966cf09-8cd0-4c3d-bd2f-b38e5302f165",
+		"tenantId": "880c2d8e-67e4-473f-abf2-c51079d1d66e"
+	}
+}

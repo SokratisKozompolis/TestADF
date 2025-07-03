@@ -1,0 +1,23 @@
+{
+	"name": "RestService1",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://api.football-data.org/v4/competitions/2002",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous",
+			"authHeaders": {
+				"X-Auth-Token": {
+					"type": "AzureKeyVaultSecret",
+					"store": {
+						"referenceName": "api_keyvault_ls",
+						"type": "LinkedServiceReference"
+					},
+					"secretName": "football-api"
+				}
+			}
+		}
+	}
+}

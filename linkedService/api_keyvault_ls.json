@@ -1,0 +1,11 @@
+{
+	"name": "api_keyvault_ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://kvdatafactorydev57b7b285.vault.azure.net/"
+		}
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"name": "fact_json_api_output",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adls_ls",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(dataset().name,'.json')",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@concat('fact_input_folder/', formatDateTime(utcnow(), 'yyyy-MM-dd'))\n",
+					"type": "Expression"
+				},
+				"fileSystem": "mycontainer"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

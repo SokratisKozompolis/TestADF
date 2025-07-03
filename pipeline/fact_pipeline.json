@@ -1,0 +1,298 @@
+{
+	"name": "fact_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Api_To_ADLS",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('items')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Retrieve_Match_Table",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"supportRFC5988": "true"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "rest_api_dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"par_api": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "fact_json_api_output",
+									"type": "DatasetReference",
+									"parameters": {
+										"name": {
+											"value": "@concat('matches_',item())",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "matches_json_to_parquet",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Retrieve_Match_Table",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"path": "['competition']['name']"
+											},
+											"sink": {
+												"name": "competition_name",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "['id']"
+											},
+											"sink": {
+												"name": "id_match",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "['utcDate']"
+											},
+											"sink": {
+												"name": "date_match",
+												"type": "Date"
+											}
+										},
+										{
+											"source": {
+												"path": "['homeTeam']['id']"
+											},
+											"sink": {
+												"name": "homeTeam_id",
+												"type": "Int32"
+											}
+										},
+										{
+											"source": {
+												"path": "['awayTeam']['id']"
+											},
+											"sink": {
+												"name": "awayTeam_id",
+												"type": "Int32"
+											}
+										},
+										{
+											"source": {
+												"path": "['score']['winner']"
+											},
+											"sink": {
+												"name": "score_winner",
+												"type": "String"
+											}
+										}
+									],
+									"collectionReference": "$['matches']"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "fact_json_api_output",
+									"type": "DatasetReference",
+									"parameters": {
+										"name": {
+											"value": "@concat('matches_',item())",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "fact_Parquet_dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"name": {
+											"value": "@concat('matches_',item())",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Create_Fact_Tables",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "matches_json_to_parquet",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "ParquetSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "ParquetReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": [
+											"id_match"
+										]
+									},
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "fact_Parquet_dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"name": {
+											"value": "@concat('matches_',item())",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "AzureSqlTable1",
+									"type": "DatasetReference",
+									"parameters": {
+										"table_name": "matches",
+										"schema": "dbo"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"items": {
+				"type": "Array",
+				"defaultValue": [
+					"2002",
+					"2021",
+					"2013",
+					"2016",
+					"2001"
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-16T07:47:34Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
