@@ -1,0 +1,23 @@
+{
+	"name": "DelimitedTextOracle",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageTest",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "testOracle",
+				"container": "test"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
