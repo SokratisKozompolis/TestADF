@@ -1,0 +1,12 @@
+{
+	"name": "AzureDatabricksDeltaLake1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricksDeltaLake",
+		"typeProperties": {
+			"domain": "https://adb-2772536904825640.0.azuredatabricks.net",
+			"clusterId": "0703-135734-91woehtg",
+			"workspaceResourceId": "/subscriptions/0e2bf9d4-c80a-46eb-bc02-9c569846475a/resourceGroups/rg-alumil-poc/providers/Microsoft.Databricks/workspaces/alumil-poc"
+		}
+	}
+}
