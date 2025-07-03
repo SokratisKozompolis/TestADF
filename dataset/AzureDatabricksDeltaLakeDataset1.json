@@ -1,0 +1,29 @@
+{
+	"name": "AzureDatabricksDeltaLakeDataset1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDatabricksDeltaLake2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureDatabricksDeltaLakeDataset",
+		"typeProperties": {
+			"database": "default",
+			"table": "test"
+		},
+		"schema": [
+			{
+				"name": "id",
+				"type": "integer"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"name": "age",
+				"type": "integer"
+			}
+		]
+	}
+}
