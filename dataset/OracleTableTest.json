@@ -1,0 +1,16 @@
+{
+	"name": "OracleTableTest",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OracleTest",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "C##TESTUSER",
+			"table": "TEST_DATA"
+		}
+	}
+}
