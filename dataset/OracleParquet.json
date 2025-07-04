@@ -1,0 +1,21 @@
+{
+	"name": "OracleParquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "BlobForDatabricks",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "testdata",
+				"folderPath": "iotdatatest",
+				"container": "test"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
