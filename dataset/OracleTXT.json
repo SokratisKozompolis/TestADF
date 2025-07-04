@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "testdata.txt",
 				"folderPath": "iotdatatest",
 				"container": "test"
 			},
