@@ -21,24 +21,18 @@
 						"queryTimeout": "02:00:00"
 					},
 					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
+						"type": "AzureDatabricksDeltaLakeSink",
+						"importSettings": {
+							"type": "AzureDatabricksDeltaLakeImportCommand"
 						}
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "BlobForDatabricks",
+							"type": "LinkedServiceReference"
+						},
+						"path": "test"
 					}
 				},
 				"inputs": [
@@ -49,7 +43,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "OracleTXT",
+						"referenceName": "FinalDelta",
 						"type": "DatasetReference"
 					}
 				]
@@ -83,6 +77,8 @@
 			{
 				"name": "Copy data2",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy data1",
@@ -101,14 +97,14 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "ParquetSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "ParquetReadSettings"
 						}
 					},
 					"sink": {
@@ -121,13 +117,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DelimitedTextOracle",
+						"referenceName": "OracleParquet",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AzureDatabricksDeltaLakeDataset1",
+						"referenceName": "FinalDelta",
 						"type": "DatasetReference"
 					}
 				]
