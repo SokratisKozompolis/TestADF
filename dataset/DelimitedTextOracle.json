@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "*.txt",
+				"fileName": "testdata.txt",
 				"folderPath": "testOracle",
 				"container": "test"
 			},
