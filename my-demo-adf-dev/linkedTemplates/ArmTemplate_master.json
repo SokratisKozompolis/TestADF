@@ -1,0 +1,195 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "my-demo-adf-dev"
+		},
+		"AzureBlobStorageTest_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageTest'"
+		},
+		"AzureDatabricksDeltaLake2_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake2'"
+		},
+		"AzureSqlDatabase1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
+		},
+		"BlobForDatabricks_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'BlobForDatabricks'"
+		},
+		"Oracle1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Oracle1'"
+		},
+		"OracleTest_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'OracleTest'"
+		},
+		"adls_ls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adls_ls'"
+		},
+		"AzureDatabricksDeltaLake3_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake3'"
+		},
+		"AzureDatabricksDeltaLake4_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake4'"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "mydem.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "testdb"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "Admin123"
+		},
+		"Oracle1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "localhost"
+		},
+		"Oracle1_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "system"
+		},
+		"OracleTest_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "localhost"
+		},
+		"OracleTest_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "system"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api.football-data.org/v4/competitions/2002"
+		},
+		"adls_ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsstgeaccdevef5e74f0.dfs.core.windows.net/"
+		},
+		"api_keyvault_ls_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kvdatafactorydev57b7b285.vault.azure.net/"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "my-demo-adf-dev_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobStorageTest_connectionString": {
+						"value": "[parameters('AzureBlobStorageTest_connectionString')]"
+					},
+					"AzureDatabricksDeltaLake2_accessToken": {
+						"value": "[parameters('AzureDatabricksDeltaLake2_accessToken')]"
+					},
+					"AzureSqlDatabase1_password": {
+						"value": "[parameters('AzureSqlDatabase1_password')]"
+					},
+					"BlobForDatabricks_connectionString": {
+						"value": "[parameters('BlobForDatabricks_connectionString')]"
+					},
+					"adls_ls_accountKey": {
+						"value": "[parameters('adls_ls_accountKey')]"
+					},
+					"AzureDatabricksDeltaLake3_accessToken": {
+						"value": "[parameters('AzureDatabricksDeltaLake3_accessToken')]"
+					},
+					"AzureDatabricksDeltaLake4_accessToken": {
+						"value": "[parameters('AzureDatabricksDeltaLake4_accessToken')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_server": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_database": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_database')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_userName": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]"
+					},
+					"adls_ls_properties_typeProperties_url": {
+						"value": "[parameters('adls_ls_properties_typeProperties_url')]"
+					},
+					"api_keyvault_ls_properties_typeProperties_baseUrl": {
+						"value": "[parameters('api_keyvault_ls_properties_typeProperties_baseUrl')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "my-demo-adf-dev_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"Oracle1_password": {
+						"value": "[parameters('Oracle1_password')]"
+					},
+					"OracleTest_password": {
+						"value": "[parameters('OracleTest_password')]"
+					},
+					"Oracle1_properties_typeProperties_server": {
+						"value": "[parameters('Oracle1_properties_typeProperties_server')]"
+					},
+					"Oracle1_properties_typeProperties_username": {
+						"value": "[parameters('Oracle1_properties_typeProperties_username')]"
+					},
+					"OracleTest_properties_typeProperties_server": {
+						"value": "[parameters('OracleTest_properties_typeProperties_server')]"
+					},
+					"OracleTest_properties_typeProperties_username": {
+						"value": "[parameters('OracleTest_properties_typeProperties_username')]"
+					},
+					"RestService1_properties_typeProperties_url": {
+						"value": "[parameters('RestService1_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'my-demo-adf-dev_ArmTemplate_0')]"
+			]
+		}
+	]
+}

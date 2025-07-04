@@ -1,0 +1,72 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "my-demo-adf-dev"
+		},
+		"AzureBlobStorageTest_connectionString": {
+			"value": ""
+		},
+		"AzureDatabricksDeltaLake2_accessToken": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_password": {
+			"value": ""
+		},
+		"BlobForDatabricks_connectionString": {
+			"value": ""
+		},
+		"Oracle1_password": {
+			"value": ""
+		},
+		"OracleTest_password": {
+			"value": ""
+		},
+		"adls_ls_accountKey": {
+			"value": ""
+		},
+		"AzureDatabricksDeltaLake3_accessToken": {
+			"value": ""
+		},
+		"AzureDatabricksDeltaLake4_accessToken": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"value": "mydem.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"value": "testdb"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"value": "Admin123"
+		},
+		"Oracle1_properties_typeProperties_server": {
+			"value": "localhost"
+		},
+		"Oracle1_properties_typeProperties_username": {
+			"value": "system"
+		},
+		"OracleTest_properties_typeProperties_server": {
+			"value": "localhost"
+		},
+		"OracleTest_properties_typeProperties_username": {
+			"value": "system"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"value": "https://api.football-data.org/v4/competitions/2002"
+		},
+		"adls_ls_properties_typeProperties_url": {
+			"value": "https://adlsstgeaccdevef5e74f0.dfs.core.windows.net/"
+		},
+		"api_keyvault_ls_properties_typeProperties_baseUrl": {
+			"value": "https://kvdatafactorydev57b7b285.vault.azure.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
