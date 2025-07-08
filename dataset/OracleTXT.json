@@ -5,12 +5,17 @@
 			"referenceName": "BlobForDatabricks",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"fileName": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "testdata.txt",
+				"fileName": "@dataset().fileName",
 				"folderPath": "iotdatatest",
 				"container": "test"
 			},
