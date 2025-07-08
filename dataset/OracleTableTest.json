@@ -5,12 +5,19 @@
 			"referenceName": "OracleTest",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"tableName": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "OracleTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "C##TESTUSER",
-			"table": "TEST_DATA"
+			"table": {
+				"value": "@dataset().tableName\n",
+				"type": "Expression"
+			}
 		}
 	}
 }
