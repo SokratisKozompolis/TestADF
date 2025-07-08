@@ -2,11 +2,6 @@
 	"name": "OracleTest",
 	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
-		"parameters": {
-			"tableName": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "Oracle",
 		"version": "2.0",
@@ -14,7 +9,7 @@
 			"server": "localhost",
 			"authenticationType": "Basic",
 			"username": "system",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJkZWE4YTIzZS0yYTBlLTQzMDMtOGEyMS0zYjUyNDk1MDA0ODIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJlODZmYjM0ZS05NmY1LTRkMDItOTc0MS01YjgwMzQ2ZDk2ZjUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "integrationRuntimeSK",
