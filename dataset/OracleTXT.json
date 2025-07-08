@@ -19,6 +19,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": "@dataset().filePath",
+				"folderPath": "OracleTest",
 				"container": "test"
 			},
 			"columnDelimiter": ",",
