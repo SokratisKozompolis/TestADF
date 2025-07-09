@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy data1",
+				"name": "CopyRaw",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -63,7 +63,10 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"fileName": "@concat(pipeline().parameters.tableName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.txt')",
-							"filePath": "@concat(pipeline().parameters.tableName, '/', pipeline().parameters.tableName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.txt')"
+							"filePath": {
+								"value": "@concat(pipeline().parameters.tableName, '/raws/', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.txt')\n",
+								"type": "Expression"
+							}
 						}
 					}
 				]
@@ -99,14 +102,7 @@
 				"type": "Copy",
 				"state": "Inactive",
 				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [
-					{
-						"activity": "Copy data1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -151,6 +147,8 @@
 			{
 				"name": "Copy data1_copy1",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -210,6 +208,85 @@
 						"parameters": {
 							"fileName": "@concat(pipeline().parameters.tableName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.txt')",
 							"filePath": "@concat(pipeline().parameters.tableName, '/', pipeline().parameters.tableName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.txt')"
+						}
+					}
+				]
+			},
+			{
+				"name": "CopyLatest",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "CopyRaw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "BlobForDatabricks",
+							"type": "LinkedServiceReference"
+						},
+						"path": "test"
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "OracleTableTest",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "@pipeline().parameters.tableName"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "OracleTXT",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": {
+								"value": "@{pipeline().parameters.tableName}.txt",
+								"type": "Expression"
+							},
+							"filePath": {
+								"value": "@concat(pipeline().parameters.tableName, '/latest/', pipeline().parameters.tableName, '.txt')",
+								"type": "Expression"
+							}
 						}
 					}
 				]
