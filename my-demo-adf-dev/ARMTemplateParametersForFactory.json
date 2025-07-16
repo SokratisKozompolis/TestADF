@@ -11,6 +11,12 @@
 		"AzureDatabricksDeltaLake2_accessToken": {
 			"value": ""
 		},
+		"AzureDatabricksDeltaLake3_accessToken": {
+			"value": ""
+		},
+		"AzureDatabricksDeltaLake4_accessToken": {
+			"value": ""
+		},
 		"AzureSqlDatabase1_password": {
 			"value": ""
 		},
@@ -24,12 +30,6 @@
 			"value": ""
 		},
 		"adls_ls_accountKey": {
-			"value": ""
-		},
-		"AzureDatabricksDeltaLake3_accessToken": {
-			"value": ""
-		},
-		"AzureDatabricksDeltaLake4_accessToken": {
 			"value": ""
 		},
 		"AzureSqlDatabase1_properties_typeProperties_server": {
@@ -61,6 +61,20 @@
 		},
 		"api_keyvault_ls_properties_typeProperties_baseUrl": {
 			"value": "https://kvdatafactorydev57b7b285.vault.azure.net/"
+		},
+		"HourlyTrigger_properties_pipeline_parameters_TableList": {
+			"value": [
+				"Test1",
+				"Test2",
+				"Test3",
+				"Test4"
+			]
+		},
+		"HourlyTrigger_properties_pipeline_parameters_WindowStart": {
+			"value": "@trigger().startTime"
+		},
+		"HourlyTrigger_properties_pipeline_parameters_WindowEnd": {
+			"value": "@trigger().endTime"
 		}
 	}
 }

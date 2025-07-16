@@ -15,6 +15,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake2'"
 		},
+		"AzureDatabricksDeltaLake3_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake3'"
+		},
+		"AzureDatabricksDeltaLake4_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake4'"
+		},
 		"AzureSqlDatabase1_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
@@ -34,14 +42,6 @@
 		"adls_ls_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'adls_ls'"
-		},
-		"AzureDatabricksDeltaLake3_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake3'"
-		},
-		"AzureDatabricksDeltaLake4_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake4'"
 		},
 		"AzureSqlDatabase1_properties_typeProperties_server": {
 			"type": "string",
@@ -82,6 +82,23 @@
 		"api_keyvault_ls_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://kvdatafactorydev57b7b285.vault.azure.net/"
+		},
+		"HourlyTrigger_properties_pipeline_parameters_TableList": {
+			"type": "array",
+			"defaultValue": [
+				"Test1",
+				"Test2",
+				"Test3",
+				"Test4"
+			]
+		},
+		"HourlyTrigger_properties_pipeline_parameters_WindowStart": {
+			"type": "string",
+			"defaultValue": "@trigger().startTime"
+		},
+		"HourlyTrigger_properties_pipeline_parameters_WindowEnd": {
+			"type": "string",
+			"defaultValue": "@trigger().endTime"
 		}
 	},
 	"variables": {
@@ -95,152 +112,210 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy data1",
-						"type": "Copy",
+						"name": "ForEachTable",
+						"type": "ForEach",
 						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "OracleSource",
-								"partitionOption": "None",
-								"queryTimeout": "02:00:00"
+							"items": {
+								"value": "@pipeline().parameters.TableList\n",
+								"type": "Expression"
 							},
-							"sink": {
-								"type": "AzureDatabricksDeltaLakeSink",
-								"importSettings": {
-									"type": "AzureDatabricksDeltaLakeImportCommand"
-								}
-							},
-							"enableStaging": true,
-							"stagingSettings": {
-								"linkedServiceName": {
-									"referenceName": "BlobForDatabricks",
-									"type": "LinkedServiceReference"
+							"isSequential": false,
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "CopyRaw_copy1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat(\n    'SELECT * FROM C##TESTUSER.', item(),\n    ' WHERE Timestamp >= TO_TIMESTAMP(''', pipeline().parameters.WindowStart, ''', ''YYYY-MM-DD\"T\"HH24:MI:SS.FF3\"Z\"'')',\n    ' AND Timestamp < TO_TIMESTAMP(''', pipeline().parameters.WindowEnd, ''', ''YYYY-MM-DD\"T\"HH24:MI:SS.FF3\"Z\"'')'\n)\n",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "BlobForDatabricks",
+												"type": "LinkedServiceReference"
+											},
+											"path": "test/LogStaging"
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "OracleTableTest",
+											"type": "DatasetReference",
+											"parameters": {
+												"tableName": {
+													"value": "@item()\n",
+													"type": "Expression"
+												},
+												"schemaName": "C##TESTUSER"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "OracleTXT",
+											"type": "DatasetReference",
+											"parameters": {
+												"fileName": {
+													"value": "@concat(item(), '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.txt')",
+													"type": "Expression"
+												},
+												"filePath": {
+													"value": "@concat(item(), '/raws/', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.txt')\n",
+													"type": "Expression"
+												}
+											}
+										}
+									]
 								},
-								"path": "test"
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "OracleTableTest",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "FinalDelta",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					},
-					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "dataflow1",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"sink1": {}
+								{
+									"name": "CopyLatest_copy1",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "CopyRaw_copy1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "BlobForDatabricks",
+												"type": "LinkedServiceReference"
+											},
+											"path": "test"
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "OracleTableTest",
+											"type": "DatasetReference",
+											"parameters": {
+												"tableName": {
+													"value": "@item()",
+													"type": "Expression"
+												},
+												"schemaName": "C##TESTUSER"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "OracleTXT",
+											"type": "DatasetReference",
+											"parameters": {
+												"fileName": {
+													"value": "@{item()}.txt",
+													"type": "Expression"
+												},
+												"filePath": {
+													"value": "@concat(item(), '/latest/', item(), '.txt')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
 								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
+							]
 						}
-					},
-					{
-						"name": "Copy data2",
-						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [
-							{
-								"activity": "Copy data1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "ParquetSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "ParquetReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureDatabricksDeltaLakeSink",
-								"importSettings": {
-									"type": "AzureDatabricksDeltaLakeImportCommand"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "OracleParquet",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "FinalDelta",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"parameters": {
+					"TableList": {
+						"type": "array",
+						"defaultValue": [
+							"TEST1",
+							"TEST2",
+							"TEST3",
+							"TEST4"
+						]
+					},
+					"WindowStart": {
+						"type": "string"
+					},
+					"WindowEnd": {
+						"type": "string"
+					}
+				},
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/OracleTableTest')]",
-				"[concat(variables('factoryId'), '/datasets/FinalDelta')]",
-				"[concat(variables('factoryId'), '/dataflows/dataflow1')]",
-				"[concat(variables('factoryId'), '/datasets/OracleParquet')]",
+				"[concat(variables('factoryId'), '/datasets/OracleTXT')]",
 				"[concat(variables('factoryId'), '/linkedServices/BlobForDatabricks')]"
 			]
 		},
@@ -1463,7 +1538,41 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/OracleTXT')]",
+			"name": "[concat(parameters('factoryName'), '/FinalDelta')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksDeltaLake4",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLakeDataset",
+				"typeProperties": {
+					"database": "default",
+					"table": "final"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "integer"
+					},
+					{
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"name": "age",
+						"type": "integer"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksDeltaLake4')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OracleParquet')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1472,12 +1581,49 @@
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "testdata",
+						"folderPath": "iotdatatest",
+						"container": "test"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/BlobForDatabricks')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OracleTXT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "BlobForDatabricks",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"fileName": {
+						"type": "string"
+					},
+					"filePath": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": "testdata.txt",
-						"folderPath": "iotdatatest",
+						"fileName": {
+							"value": "@dataset().filePath",
+							"type": "Expression"
+						},
+						"folderPath": "OracleTest",
 						"container": "test"
 					},
 					"columnDelimiter": ",",
@@ -1500,12 +1646,26 @@
 					"referenceName": "OracleTest",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					},
+					"schemaName": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "OracleTable",
 				"schema": [],
 				"typeProperties": {
-					"schema": "C##TESTUSER",
-					"table": "TEST_DATA"
+					"schema": {
+						"value": "@dataset().schemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tableName\n",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": [
@@ -1752,6 +1912,42 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake3')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLake",
+				"typeProperties": {
+					"domain": "https://adb-2772536904825640.0.azuredatabricks.net",
+					"clusterId": "0704-121651-omc92zul",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksDeltaLake3_accessToken')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake4')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLake",
+				"typeProperties": {
+					"domain": "https://adb-2772536904825640.0.azuredatabricks.net",
+					"clusterId": "0704-143646-5e2vqaxz",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksDeltaLake4_accessToken')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -1896,6 +2092,42 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/HourlyTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "OracleBlob",
+						"type": "PipelineReference"
+					},
+					"parameters": {
+						"TableList": "[parameters('HourlyTrigger_properties_pipeline_parameters_TableList')]",
+						"WindowStart": "[parameters('HourlyTrigger_properties_pipeline_parameters_WindowStart')]",
+						"WindowEnd": "[parameters('HourlyTrigger_properties_pipeline_parameters_WindowEnd')]"
+					}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Minute",
+					"interval": 60,
+					"startTime": "2025-07-16T11:18:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 50,
+					"retryPolicy": {
+						"count": 1,
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/OracleBlob')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/demo_trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1984,102 +2216,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DelimitedTextOracle')]",
 				"[concat(variables('factoryId'), '/datasets/Parquet1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake3')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureDatabricksDeltaLake",
-				"typeProperties": {
-					"domain": "https://adb-2772536904825640.0.azuredatabricks.net",
-					"clusterId": "0704-121651-omc92zul",
-					"accessToken": {
-						"type": "SecureString",
-						"value": "[parameters('AzureDatabricksDeltaLake3_accessToken')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake4')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureDatabricksDeltaLake",
-				"typeProperties": {
-					"domain": "https://adb-2772536904825640.0.azuredatabricks.net",
-					"clusterId": "0704-124217-3j3y2ymb",
-					"accessToken": {
-						"type": "SecureString",
-						"value": "[parameters('AzureDatabricksDeltaLake4_accessToken')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/FinalDelta')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDatabricksDeltaLake4",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureDatabricksDeltaLakeDataset",
-				"typeProperties": {
-					"database": "default",
-					"table": "test"
-				},
-				"schema": [
-					{
-						"name": "id",
-						"type": "integer"
-					},
-					{
-						"name": "name",
-						"type": "string"
-					},
-					{
-						"name": "age",
-						"type": "integer"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksDeltaLake4')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OracleParquet')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "BlobForDatabricks",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "testdata",
-						"folderPath": "iotdatatest",
-						"container": "test"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/BlobForDatabricks')]"
 			]
 		}
 	]
