@@ -8,12 +8,19 @@
 		"parameters": {
 			"tableName": {
 				"type": "string"
+			},
+			"schemaName": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
 		"type": "OracleTable",
 		"schema": [],
 		"typeProperties": {
+			"schema": {
+				"value": "@dataset().schemaName",
+				"type": "Expression"
+			},
 			"table": {
 				"value": "@dataset().tableName\n",
 				"type": "Expression"
