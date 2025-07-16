@@ -345,12 +345,10 @@
 				]
 			},
 			"WindowStart": {
-				"type": "string",
-				"defaultValue": "@trigger().startTime"
+				"type": "string"
 			},
 			"WindowEnd": {
-				"type": "string",
-				"defaultValue": "@trigger().endTime"
+				"type": "string"
 			}
 		},
 		"annotations": []
