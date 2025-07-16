@@ -14,7 +14,9 @@
 					"Test2",
 					"Test3",
 					"Test4"
-				]
+				],
+				"WindowStart": "@trigger().startTime",
+				"WindowEnd": "@trigger().endTime"
 			}
 		},
 		"type": "TumblingWindowTrigger",
