@@ -193,10 +193,12 @@
 				]
 			},
 			"WindowStart": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@trigger().startTime"
 			},
 			"WindowEnd": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@trigger().endTime"
 			}
 		},
 		"annotations": []
