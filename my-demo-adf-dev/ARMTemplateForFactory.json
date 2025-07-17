@@ -140,7 +140,7 @@
 										"source": {
 											"type": "OracleSource",
 											"oracleReaderQuery": {
-												"value": "@concat(\n    'SELECT * FROM C##TESTUSER.', item(),\n    ' WHERE Timestamp >= TO_TIMESTAMP(''', pipeline().parameters.WindowStart, ''', ''YYYY-MM-DD\"T\"HH24:MI:SS.FF3\"Z\"'')',\n    ' AND Timestamp < TO_TIMESTAMP(''', pipeline().parameters.WindowEnd, ''', ''YYYY-MM-DD\"T\"HH24:MI:SS.FF3\"Z\"'')'\n)\n",
+												"value": "SELECT * FROM C##TESTUSER.@{item()} WHERE Timestamp >= TO_TIMESTAMP(@{pipeline().parameters.WindowStart}), 'YYYY-MM-DD\"T\"HH24:MI:SS.FF3\"Z\"'')",
 												"type": "Expression"
 											},
 											"partitionOption": "None",
@@ -305,10 +305,12 @@
 						]
 					},
 					"WindowStart": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "@trigger().startTime"
 					},
 					"WindowEnd": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "@trigger().endTime"
 					}
 				},
 				"annotations": []
@@ -2097,7 +2099,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipeline": {
 					"pipelineReference": {
 						"referenceName": "OracleBlob",
