@@ -75,7 +75,10 @@
 											"type": "Expression"
 										},
 										"schemaName": "C##TESTUSER",
-										"WindowStartTime": "@trigger().outputs.windowStartTime"
+										"WindowStartTime": {
+											"value": "@pipeline().parameters.WindowStart",
+											"type": "Expression"
+										}
 									}
 								}
 							],
@@ -158,7 +161,15 @@
 											"value": "@item()",
 											"type": "Expression"
 										},
-										"schemaName": "C##TESTUSER"
+										"schemaName": "C##TESTUSER",
+										"WindowStartTime": {
+											"value": "@pipeline().parameters.WindowStart",
+											"type": "Expression"
+										},
+										"WindowEndTime": {
+											"value": "@pipeline().parameters.WindowEnd",
+											"type": "Expression"
+										}
 									}
 								}
 							],
