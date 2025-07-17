@@ -31,7 +31,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "@concat(\n        'SELECT * FROM C##TESTUSER.', item(), \n        ' WHERE Timestamp >= TO_TIMESTAMP(''', pipeline().parameters.WindowStart, ''', ''MM/DD/YY, HH:MI:SS AM'') ',\n        'AND Timestamp < TO_TIMESTAMP(''', pipeline().parameters.WindowEnd, ''', ''MM/DD/YY, HH:MI:SS AM'')'\n    )",
+										"value": "@concat(\n        'SELECT * FROM C##TESTUSER.', item(), \n        ' WHERE Timestamp >= TO_TIMESTAMP(''', pipeline().parameters.WindowStart, ''', ''DD/MM/YY, HH:MI:SS AM'') ',\n        'AND Timestamp < TO_TIMESTAMP(''', pipeline().parameters.WindowEnd, ''', ''DD/MM/YY, HH:MI:SS AM'')'\n    )",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
