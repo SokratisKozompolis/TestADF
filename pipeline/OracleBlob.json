@@ -78,6 +78,10 @@
 										"WindowStartTime": {
 											"value": "@pipeline().parameters.WindowStart",
 											"type": "Expression"
+										},
+										"WindowEndTime": {
+											"value": "@pipeline().parameters.WindowEnd",
+											"type": "Expression"
 										}
 									}
 								}
