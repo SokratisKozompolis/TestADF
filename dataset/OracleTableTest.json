@@ -11,6 +11,12 @@
 			},
 			"schemaName": {
 				"type": "string"
+			},
+			"WindowStartTime": {
+				"type": "string"
+			},
+			"WindowEndTime": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

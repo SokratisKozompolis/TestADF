@@ -74,7 +74,8 @@
 											"value": "@item()\n",
 											"type": "Expression"
 										},
-										"schemaName": "C##TESTUSER"
+										"schemaName": "C##TESTUSER",
+										"WindowStartTime": "@trigger().outputs.windowStartTime"
 									}
 								}
 							],
